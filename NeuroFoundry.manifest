@@ -1,0 +1,18 @@
+﻿<Module xmlns="http://waher.se/Schema/ModuleManifest.xsd">
+	<Content fileName="NeuroFoundry.config"/>
+	<Folder name="Root">
+		<Folder name="NeuroFoundry">
+			<Content fileName="NeuroFoundry.cssx"/>
+			<Content fileName="NeuroFoundry.js"/>
+			<Content fileName="Index.md"/>
+			<Content fileName="Invitation.md"/>
+			<Content fileName="Login.js"/>
+			<Content fileName="Login.md"/>
+			<Content fileName="LogOut.md"/>
+			<Content fileName="Master.md"/>
+			<Content fileName="Menu.md"/>
+			<Folder name="Images">
+			</Folder>
+		</Folder>
+	</Folder>
+</Module>

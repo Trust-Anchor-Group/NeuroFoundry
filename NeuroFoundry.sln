@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33927.249
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5AF6C80B-D26B-41B7-8E56-2D2562058AD0}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		NeuroFoundry.config = NeuroFoundry.config
+		NeuroFoundry.manifest = NeuroFoundry.manifest
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Root", "Root", "{F7E93E21-CA3C-4576-914E-69D6E5721840}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NeuroFoundry", "NeuroFoundry", "{32207730-82AA-4FA9-9556-8FBE6FFD3FBE}"
+	ProjectSection(SolutionItems) = preProject
+		Root\NeuroFoundry\Index.md = Root\NeuroFoundry\Index.md
+		Root\NeuroFoundry\Login.js = Root\NeuroFoundry\Login.js
+		Root\NeuroFoundry\Login.md = Root\NeuroFoundry\Login.md
+		Root\NeuroFoundry\LogOut.md = Root\NeuroFoundry\LogOut.md
+		Root\NeuroFoundry\Master.md = Root\NeuroFoundry\Master.md
+		Root\NeuroFoundry\Menu.md = Root\NeuroFoundry\Menu.md
+		Root\NeuroFoundry\NeuroFoundry.cssx = Root\NeuroFoundry\NeuroFoundry.cssx
+		Root\NeuroFoundry\NeuroFoundry.js = Root\NeuroFoundry\NeuroFoundry.js
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{32207730-82AA-4FA9-9556-8FBE6FFD3FBE} = {F7E93E21-CA3C-4576-914E-69D6E5721840}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BC59F01F-0991-4ABE-9F3A-22CB74BF2588}
+	EndGlobalSection
+EndGlobal
