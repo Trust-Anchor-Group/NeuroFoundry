@@ -2,6 +2,8 @@
 	<Content fileName="NeuroFoundry.config"/>
 	<Folder name="Root">
 		<Folder name="NeuroFoundry">
+			<Content fileName="ContractMarkdown.md"/>
+			<Content fileName="GetContractMarkdown.ws"/>
 			<Content fileName="NeuroFoundry.cssx"/>
 			<Content fileName="NeuroFoundry.js"/>
 			<Content fileName="Index.md"/>

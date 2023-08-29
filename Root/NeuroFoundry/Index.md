@@ -7,6 +7,7 @@ Cache-Control: max-age=0, no-cache, no-store
 UserVariable: QuickLoginUser
 Login: /NeuroFoundry/Login.md
 BodyOnly: {{exists(Posted)}}
+AllowScriptTag: true
 
 ==================
 
@@ -108,6 +109,19 @@ if NeuroFoundryState.Step=0 then
 			NeuroFoundryState.ContractMarkdown:="";
 			NeuroFoundryState.HeaderInfo:=null;
 		)
+		else if Posted matches {"cmd":"EditDocument"} then
+		(
+			NeuroFoundryState.EditMode:=true;
+		)
+		else if Posted matches {"cmd":"CancelEdit"} then
+		(
+			NeuroFoundryState.EditMode:=false;
+		)
+		else if Posted matches {"cmd":"DocumentEdited","markdown":PMarkdown} then
+		(
+			NeuroFoundryState.EditMode:=false;
+			NeuroFoundryState.ContractMarkdown:=PMarkdown;
+		)
 		else
 			BadRequest("Posted content did not match expected input.");
 	);
@@ -143,8 +157,18 @@ Upload a Word document (in `.docx` format) to start the creation of the smart co
 <input name="WordFile" id="WordFile" type="file" accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
        multiple="false" onchange="UploadDocument()"/>
 </p>[[
-	else
-	]]
+		else if NeuroFoundryState.EditMode then ]]
+<p id="EditForm">
+Edit the text of the document, using <a href="ContractMarkdown.md" target="_blank">Markdown</a>:  
+<textarea id="ContractMarkdown"></textarea>
+
+<button type="button" class="posButton" onclick="UpdateText()">Update</button>
+<button type="button" class="negButton" onclick="CancelEdit()">Cancel</button>
+
+<script>LoadContractMarkdown()</script>
+</p>[[
+		else
+		]]
 <p>
 Please review the preview of the uploaded document below. Note that unsupported formatting has been removed from the document.
 
@@ -152,9 +176,9 @@ Please review the preview of the uploaded document below. Note that unsupported 
 * If you want to perform minor changes in the text, or correct some formatting errors, press the **Edit Text** button.
 * When satisfied with the text, press the **Next** button. (You will be able to edit the text in following steps as well.)  
 
-<button type="button" class="posButton" onlick="EditText()">Edit Text</button>
+<button type="button" class="posButton" onclick="EditText()">Edit Text</button>
 <button type="button" class="negButton" onclick="UploadNewDocument()">Upload New</button>
-<button type="button" class="posButton" onlick="Next()">Next</button>
+<button type="button" class="posButton" onclick="Next()">Next</button>
 
 <h2>Preview</h2>
 

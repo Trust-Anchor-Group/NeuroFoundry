@@ -10,7 +10,7 @@
         if (xhttp.readyState === 4)
         {
             if (xhttp.status === 200)
-                document.body.innerHTML = xhttp.responseText;
+                SetDynamicHtml(document.body, xhttp.responseText);
             else
             {
                 UploadForm.setAttribute("style", "display:inline");
@@ -39,7 +39,7 @@ function DoFullPagePost(Request)
         if (xhttp.readyState === 4)
         {
             if (xhttp.status === 200)
-                document.body.innerHTML = xhttp.responseText;
+                SetDynamicHtml(document.body, xhttp.responseText);
             else
                 ShowError(xhttp);
         }
@@ -57,6 +57,40 @@ function UploadNewDocument()
 
 function EditText()
 {
+    DoFullPagePost({ "cmd": "EditDocument" });
+}
+
+function LoadContractMarkdown()
+{
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function ()
+    {
+        if (xhttp.readyState === 4)
+        {
+            if (xhttp.status === 200)
+                document.getElementById("ContractMarkdown").value = xhttp.responseText;
+            else
+                ShowError(xhttp);
+        }
+    };
+
+    xhttp.open("POST", "/NeuroFoundry/GetContractMarkdown.ws", true);
+    xhttp.setRequestHeader("Accept", "text/plain");
+    xhttp.send();
+}
+
+function UpdateText()
+{
+    DoFullPagePost(
+        {
+            "cmd": "DocumentEdited",
+            "markdown": document.getElementById("ContractMarkdown").value
+        });
+}
+
+function CancelEdit()
+{
+    DoFullPagePost({ "cmd": "CancelEdit" });
 }
 
 function Next()

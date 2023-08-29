@@ -94,3 +94,8 @@ fieldset > legend
 	position:relative;
 	top:-0.45em;
 }
+
+textarea
+{
+	min-height:50vh;
+}
