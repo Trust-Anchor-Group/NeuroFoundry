@@ -19,7 +19,6 @@ Welcome to TAG Neuro-Foundry^TM. This service allows you to create smart contrac
 or its variants.
 
 <fieldset>
-
 {{
 MS:=TAG.Content.Microsoft;
 
@@ -130,6 +129,10 @@ if exists(Posted) then
 	(
 		NeuroFoundryState.Step++;
 	)
+	else if Posted matches {"cmd":"Prev"} then
+	(
+		NeuroFoundryState.Step--;
+	)
 	else
 		BadRequest("Posted content did not match expected input.");
 );
@@ -140,6 +143,7 @@ if NeuroFoundryState.Step=0 then
 	if !empty(Waher.IoTGateway.Gateway.Domain) and !Waher.IoTGateway.Gateway.IsDomain(UserDomain,true) then
 	(
 		]]
+
 ## Your account is registered on another server
 
 This service is only available on this domain for users with account on this server. To create a contract using this service 
@@ -154,8 +158,7 @@ to install the service to their [Feedback page](https://((UserDomain))/Feedback.
 	)
 	else
 	(
-		]]
-<legend>
+		]]<legend>
 <span class="headerIndex">1</span>
 <span class="headerText">Human-readable text</span>
 </legend>[[;
@@ -198,8 +201,7 @@ Please review the preview of the uploaded document below. Note that unsupported 
 )
 else if NeuroFoundryState.Step=1 then
 (
-	]]
-<legend>
+	]]<legend>
 <span class="headerIndex">2</span>
 <span class="headerText">Language</span>
 </legend>
@@ -406,7 +408,18 @@ is correct, and then press the **Next** button to continue.
 [[;
 
 	if HasSelected then ]]
+<button type="button" class="posButton" onclick="Prev()">Previous</button>
 <button type="button" class="posButton" onclick="Next()">Next</button>
+[[
+)
+else
+(
+	]]<legend>
+<span class="headerIndex">3</span>
+<span class="headerText">Roles</span>
+</legend>
+
+<button type="button" class="posButton" onclick="Prev()">Previous</button>
 [[
 )
 }}

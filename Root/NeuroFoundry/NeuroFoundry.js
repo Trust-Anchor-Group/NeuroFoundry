@@ -93,6 +93,11 @@ function CancelEdit()
     DoFullPagePost({ "cmd": "CancelEdit" });
 }
 
+function Prev()
+{
+    DoFullPagePost({ "cmd": "Prev" });
+}
+
 function Next()
 {
     DoFullPagePost({ "cmd": "Next" });
