@@ -95,4 +95,14 @@ function CancelEdit()
 
 function Next()
 {
+    DoFullPagePost({ "cmd": "Next" });
+}
+
+function LanguageChanged()
+{
+    DoFullPagePost(
+        {
+            "cmd": "SelectLanguage",
+            "language": document.getElementById("Language").value
+        });
 }
