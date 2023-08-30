@@ -15,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Root", "Root", "{F7E93E21-C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NeuroFoundry", "NeuroFoundry", "{32207730-82AA-4FA9-9556-8FBE6FFD3FBE}"
 	ProjectSection(SolutionItems) = preProject
+		Root\NeuroFoundry\ContractMarkdown.md = Root\NeuroFoundry\ContractMarkdown.md
 		Root\NeuroFoundry\Index.md = Root\NeuroFoundry\Index.md
 		Root\NeuroFoundry\Invitation.md = Root\NeuroFoundry\Invitation.md
 		Root\NeuroFoundry\Login.js = Root\NeuroFoundry\Login.js
