@@ -39,6 +39,8 @@ if exists(Posted) then
 		Language:=null;
 		Markdown:=MS.WordUtilities.ExtractAsMarkdown(Posted,Language);
 
+		SaveFile(Markdown,"C:\\Temp\\Markdown.md");
+
 		NeuroFoundryState.Contract:=Create(Waher.Service.IoTBroker.Legal.Contracts.Contract);
 		NeuroFoundryState.Contract.Provider:=Waher.Service.IoTBroker.XmppServerModule.Legal.MainDomain.Address;
 		NeuroFoundryState.Contract.Account:=Before(QuickLoginUser.Jid,"@");
@@ -94,12 +96,18 @@ if exists(Posted) then
 		NeuroFoundryState.HeaderInfo:=HeaderInfo;
 
 		Parsed:=Waher.Content.Markdown.MarkdownDocument.CreateAsync(NeuroFoundryState.ContractMarkdown,[]);
-		SmartContractXml:=Xml("<Root xmlns='urn:ieee:iot:leg:sc:1.0'>"+Parsed.GenerateSmartContractXml()+"</Root>");
+		SmartContractXml:=Parsed.GenerateSmartContractXml();
+	
+		SaveFile(SmartContractXml,"C:\\Temp\\SmartContract.xml");
+
+		SmartContractXml:=Xml("<Root xmlns='urn:ieee:iot:leg:sc:1.0'>"+SmartContractXml+"</Root>");
 		SmartContractText:=Waher.Service.IoTBroker.Legal.HumanReadable.HumanReadableText.Parse(SmartContractXml.DocumentElement);
 		SmartContractText.Language:=Language;
 		sb:=Create(System.Text.StringBuilder);
-		SmartContractText.ToMarkdown(sb,NeuroFoundryState.Contract,2);
+		SmartContractText.ToMarkdown(sb,NeuroFoundryState.Contract,2,0);
 		Markdown:=sb.ToString();
+
+		SaveFile(Markdown,"C:\\Temp\\SmartContract.md");
 
 		NeuroFoundryState.ContractMarkdown:=Markdown;
 	)
