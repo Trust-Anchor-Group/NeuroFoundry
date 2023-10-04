@@ -103,9 +103,9 @@ if exists(Posted) then
 		SmartContractXml:=Xml("<Root xmlns='urn:ieee:iot:leg:sc:1.0'>"+SmartContractXml+"</Root>");
 		SmartContractText:=Waher.Service.IoTBroker.Legal.HumanReadable.HumanReadableText.Parse(SmartContractXml.DocumentElement);
 		SmartContractText.Language:=Language;
-		sb:=Create(System.Text.StringBuilder);
-		SmartContractText.ToMarkdown(sb,NeuroFoundryState.Contract,2,0);
-		Markdown:=sb.ToString();
+		MarkdownOutput:=Create(Waher.Service.IoTBroker.Legal.HumanReadable.MarkdownOutput);
+		SmartContractText.ToMarkdown(MarkdownOutput,NeuroFoundryState.Contract,2,0);
+		Markdown:=MarkdownOutput.ToString();
 
 		SaveFile(Markdown,"C:\\Temp\\SmartContract.md");
 
