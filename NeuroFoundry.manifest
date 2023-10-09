@@ -4,8 +4,6 @@
 		<Folder name="NeuroFoundry">
 			<Content fileName="ContractMarkdown.md"/>
 			<Content fileName="GetContractMarkdown.ws"/>
-			<Content fileName="NeuroFoundry.cssx"/>
-			<Content fileName="NeuroFoundry.js"/>
 			<Content fileName="Index.md"/>
 			<Content fileName="Invitation.md"/>
 			<Content fileName="Login.js"/>
@@ -13,6 +11,8 @@
 			<Content fileName="LogOut.md"/>
 			<Content fileName="Master.md"/>
 			<Content fileName="Menu.md"/>
+			<Content fileName="NeuroFoundry.cssx"/>
+			<Content fileName="NeuroFoundry.js"/>
 			<Folder name="Images">
 			</Folder>
 		</Folder>
