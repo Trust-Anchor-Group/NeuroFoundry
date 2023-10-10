@@ -22,6 +22,8 @@ or its variants.
 {{
 MS:=TAG.Content.Microsoft;
 
+if !exists(QuickLoginUser) then QuickLoginUser:=null;
+
 if !exists(NeuroFoundryState) then NeuroFoundryState:=
 {
 	"Step":0,
@@ -43,7 +45,7 @@ if exists(Posted) then
 
 		NeuroFoundryState.Contract:=Create(Waher.Service.IoTBroker.Legal.Contracts.Contract);
 		NeuroFoundryState.Contract.Provider:=Waher.Service.IoTBroker.XmppServerModule.Legal.MainDomain.Address;
-		NeuroFoundryState.Contract.Account:=Before(QuickLoginUser.Jid,"@");
+		NeuroFoundryState.Contract.Account:=Before(QuickLoginUser?.Jid,"@");
 		NeuroFoundryState.Contract.Created:=NowUtc;
 		NeuroFoundryState.Contract.PartsMode:=Waher.Service.IoTBroker.Legal.Contracts.ContractParts.Open;
 
@@ -143,7 +145,7 @@ if exists(Posted) then
 
 if NeuroFoundryState.Step=0 then
 (
-	UserDomain:=After(QuickLoginUser.Jid,"@");
+	UserDomain:=After(QuickLoginUser?.Jid,"@");
 	if !empty(Waher.IoTGateway.Gateway.Domain) and !Waher.IoTGateway.Gateway.IsDomain(UserDomain,true) then
 	(
 		]]
