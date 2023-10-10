@@ -37,7 +37,9 @@ if exists(Posted) then
 	if Posted is DocumentFormat.OpenXml.Packaging.WordprocessingDocument then
 	(
 		Language:=null;
-		Markdown:=MS.WordUtilities.ExtractAsMarkdown(Posted,Language);
+		Markdown:=MS.WordUtilities.ExtractAsMarkdown(Posted,Request.Header["X-FileName"],Language);
+
+		SaveFile(Markdown,"C:\\Temp\\Markdown.md");
 
 		NeuroFoundryState.Contract:=Create(Waher.Service.IoTBroker.Legal.Contracts.Contract);
 		NeuroFoundryState.Contract.Provider:=Waher.Service.IoTBroker.XmppServerModule.Legal.MainDomain.Address;
