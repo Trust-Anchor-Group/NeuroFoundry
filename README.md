@@ -11,6 +11,26 @@ You need to install the `TAG.XmppOpenAIBridge.package` on the Neuron(R) you wish
 the development machine. You also need to configure a node named `ChatGPT`, with a live connection to OpenAI, as indicated in
 the linked article. Without such a node available, many features of the *Neuro-Foundry*^TM will not be avialable.
 
+Installable Package
+-----------------------
+
+The `NeuroFoundry` project has been made into a package that can be downloaded and installed on any 
+[TAG Neuron](https://lab.tagroot.io/Documentation/Index.md).
+To create a package, that can be distributed or installed, you begin by creating a *manifest file*. 
+You then use the `Waher.Utility.Install` and `Waher.Utility.Sign` command-line
+tools in the [IoT Gateway](https://github.com/PeterWaher/IoTGateway) repository, to create a package file and cryptographically
+sign it for secure distribution across the Neuron network.
+
+The Neuro-Foundry service is published as a package on TAG Neurons. If your neuron is connected to this network, you can 
+install the package using the following information:
+
+| Package information                                                                                                              ||
+|:-----------------|:---------------------------------------------------------------------------------------------------------------|
+| Package          | `TAG.NeuroFoundry.package`                                                                                     |
+| Installation key | `5QDkyfuXZod8frqxxPxZ6987kGrPSERMhud0nE3c7Hs1oHj/PKQxm4jdb8uLvOxt7bsmgrNjiY8A81f716a3c08c80ea2babacc621d1688f` |
+| More Information | TBD                                                                                                            |
+
+
 Development
 --------------
 
