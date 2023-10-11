@@ -60,7 +60,7 @@ nav > ul > li > a > img
 	float:right;
 }
 
-fieldset > legend
+fieldset legend
 {
 	background-color:transparent;
 	padding:0;
@@ -91,6 +91,10 @@ fieldset > legend
     font-size: 1.25em;
 	padding: 0.25em 1em 0.25em 1em;
 	border-radius:0.7em;
+}
+
+.headerIndex + .headerText
+{
 	position:relative;
 	top:-0.45em;
 }

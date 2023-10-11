@@ -114,6 +114,13 @@ if exists(Posted) then
 		NeuroFoundryState.ContractMarkdown:="";
 		NeuroFoundryState.HeaderInfo:=null;
 	)
+	else if Posted matches {"cmd":"CreateManually","title":PTitle} then
+	(
+		NeuroFoundryState.ContractMarkdown:=MarkdownEncode(PTitle)+"\r\n" + 
+			Create(System.String,"=",len(PTitle)+3)+"\r\n\r\n";
+		NeuroFoundryState.HeaderInfo:=null;
+		NeuroFoundryState.EditMode:=true;
+	)
 	else if Posted matches {"cmd":"EditDocument"} then
 	(
 		NeuroFoundryState.EditMode:=true;
@@ -143,6 +150,11 @@ if exists(Posted) then
 		BadRequest("Posted content did not match expected input.");
 );
 
+
+
+
+
+
 if NeuroFoundryState.Step=0 then
 (
 	UserDomain:=After(QuickLoginUser?.Jid,"@");
@@ -161,6 +173,17 @@ If the link does not work, it might indicate that Neuro-Foundry^TM is not instal
 to install the service to their [Feedback page](https://((UserDomain))/Feedback.md).
 
 [[
+
+
+
+
+
+
+
+
+
+
+
 	)
 	else
 	(
@@ -169,16 +192,89 @@ to install the service to their [Feedback page](https://((UserDomain))/Feedback.
 <span class="headerText">Human-readable text</span>
 </legend>[[;
 
-		if empty(NeuroFoundryState.ContractMarkdown) then ]]
-<p id="UploadForm">
-Upload a Word document (in `.docx` format) to start the creation of the smart contract:  
-<input name="WordFile" id="WordFile" name="WordFile" type="file" accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
+		if empty(NeuroFoundryState.ContractMarkdown) then 
+		(
+			]]
+<form id="UploadForm">
+
+The first step in creating a *smart contract* is to generate the human-readable text that
+human users can read. You can either:
+
+<p>
+<input type="radio" id="UploadWord" name="StartMethod" value="MsWord" checked onclick="StartMethodChanged()">
+<label for="UploadWord">Upload a **Microsoft Word** document with the text already written,</label>
+</p>
+
+[[;
+
+			if ChatGptConfigured() then ]]
+<p>
+<input type="radio" id="SuggestWithAi" name="StartMethod" value="AI" onclick="StartMethodChanged()">
+<label for="SuggestWithAi">Start from a suggestion created by **Artificial Intelligence**,</label>
+</p>
+
+[[;
+
+			]]
+<p>
+<input type="radio" id="Manually" name="StartMethod" value="Manually" onclick="StartMethodChanged()">
+<label for="Manually">Enter the text **Manually** here on the page.</label>  
+</p>
+
+<fieldset id="UploadWordForm" style="display:block">
+<legend><span class="headerText">Upload Word Document</span></legend>
+
+<p>
+<label for="WordFile">If you want to upload a **Word document** (in `.docx` format), select it here below:</label>  
+<input name="WordFile" id="WordFile" type="file" accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
        multiple="false" onchange="UploadDocument()"/>
-</p>[[
+</p>
+</fieldset>
+[[;
+
+			if ChatGptConfigured() then ]]
+
+<fieldset id="SuggestWithAiForm" style="display:none">
+<legend><span class="headerText">Suggest text using *Artifical Intelligence*</span></legend>
+
+<p>
+<label for="DocumentType">To create a document using *Artificial Intelligence*, indicate what **type of document** you want to create:</label>  
+<input name="DocumentType" id="DocumentType" type="text"/>
+</p>
+
+<p>
+<label for="DocumentScope">Provide some information about the **scope** or **purpose** of the document:</label>  
+<input name="DocumentScope" id="DocumentScope" type="text"/>
+</p>
+
+<p>
+<label for="DocumentJurisdiction">In what **jurisdiction** should the document work:</label>  
+<input name="DocumentJurisdiction" id="DocumentJurisdiction" type="text"/>
+</p>
+
+<button type="button" onclick="StartAICreationProcess()">Start Creation Process</button>
+</fieldset>
+
+[[;
+			]]
+
+<fieldset id="ManuallyForm" style="display:none">
+<legend><span class="headerText">Enter text *Manually*</span></legend>
+
+<p>
+<label for="DocumentTitle">To create a document *Manually*, enter the Title of the document:</label>  
+<input name="DocumentTitle" id="DocumentTitle" type="text"/>
+</p>
+
+<button type="button" onclick="CreateManually()">Create Manually</button>
+</fieldset>
+
+</form>[[
+		)
 		else if NeuroFoundryState.EditMode then ]]
 <p id="EditForm">
 Edit the text of the document, using <a href="ContractMarkdown.md" target="_blank">Markdown</a>:  
-<textarea id="ContractMarkdown" name="ContractMarkdown"></textarea>
+<textarea id="ContractMarkdown" name="ContractMarkdown" autofocus></textarea>
 
 <button type="button" class="posButton" onclick="UpdateText()">Update</button>
 <button type="button" class="negButton" onclick="CancelEdit()">Cancel</button>
@@ -190,12 +286,12 @@ Edit the text of the document, using <a href="ContractMarkdown.md" target="_blan
 <p>
 Please review the preview of the uploaded document below. Note that unsupported formatting has been removed from the document.
 
-* If you are unhappy with the text or want to upload another document, you can simply press the **Upload New Document** button.
+* If you are unhappy with the text or want to upload another document, you can simply press the **Throw Away** button, to restart the process.
 * If you want to perform minor changes in the text, or correct some formatting errors, press the **Edit Text** button.
 * When satisfied with the text, press the **Next** button. (You will be able to edit the text in following steps as well.)  
 
 <button type="button" class="posButton" onclick="EditText()">Edit Text</button>
-<button type="button" class="negButton" onclick="UploadNewDocument()">Upload New</button>
+<button type="button" class="negButton" onclick="ThrowAway()">Throw Away</button>
 <button type="button" class="posButton" onclick="Next()">Next</button>
 
 <h2>Preview</h2>

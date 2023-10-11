@@ -50,7 +50,7 @@ function DoFullPagePost(Request)
     xhttp.send(JSON.stringify(Request));
 }
 
-function UploadNewDocument()
+function ThrowAway()
 {
     DoFullPagePost({ "cmd": "NewDocument" });
 }
@@ -110,4 +110,37 @@ function LanguageChanged()
             "cmd": "SelectLanguage",
             "language": document.getElementById("Language").value
         });
+}
+
+function StartMethodChanged()
+{
+    FormVisibility("UploadWord");
+    FormVisibility("SuggestWithAi");
+    FormVisibility("Manually");
+}
+
+function FormVisibility(Name)
+{
+    var Input = document.getElementById(Name);
+    var Form = document.getElementById(Name + "Form");
+
+    Form.setAttribute("style", StyleFromChecked(Input.checked));
+}
+
+function StyleFromChecked(Checked)
+{
+    return Checked ? "display:block" : "display:none";
+}
+
+function CreateManually()
+{
+    DoFullPagePost(
+        {
+            "cmd": "CreateManually",
+            "title": document.getElementById("DocumentTitle").value
+        });
+}
+
+function StartAICreationProcess()
+{
 }
