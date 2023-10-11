@@ -41,8 +41,6 @@ if exists(Posted) then
 		Language:=null;
 		Markdown:=MS.WordUtilities.ExtractAsMarkdown(Posted,Request.Header["X-FileName"],Language);
 
-		SaveFile(Markdown,"C:\\Temp\\Markdown.md");
-
 		NeuroFoundryState.Contract:=Create(Waher.Service.IoTBroker.Legal.Contracts.Contract);
 		NeuroFoundryState.Contract.Provider:=Waher.Service.IoTBroker.XmppServerModule.Legal.MainDomain.Address;
 		NeuroFoundryState.Contract.Account:=Before(QuickLoginUser?.Jid,"@");
@@ -200,7 +198,7 @@ to install the service to their [Feedback page](https://((UserDomain))/Feedback.
 The first step in creating a *smart contract* is to generate the human-readable text that
 human users can read. You can either:
 
-<p>
+<p style="margin-top:1.5em">
 <input type="radio" id="UploadWord" name="StartMethod" value="MsWord" checked onclick="StartMethodChanged()">
 <label for="UploadWord">Upload a **Microsoft Word** document with the text already written,</label>
 </p>
