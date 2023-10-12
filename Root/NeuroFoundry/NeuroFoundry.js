@@ -160,11 +160,19 @@ function AddMarkdown(Data)
     var Control = document.getElementById("ContractMarkdown");
     var s = Control.value;
     var i = s.indexOf(Data.Placeholder);
+    var Markdown = Data.Markdown.trim().replace(/\:\*\*/g, "\\:**");
 
     if (i < 0)
-        s += "\r\n\r\n" + Data.Markdown;
+        s += "\r\n\r\n" + Markdown;
     else
-        s = s.substring(0, i) + Data.Markdown + "\r\n\r\n" + s.substring(i + Data.Placeholder.length);
+    {
+        var s2 = s.substring(i + Data.Placeholder.length);
+
+        if (s2.length > 0)
+            s2 = "\r\n\r\n" + s2;
+
+        s = s.substring(0, i) + Markdown + s2;
+    }
 
     Control.value = s;
 }

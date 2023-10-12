@@ -147,6 +147,16 @@ if exists(Posted) then
 		"tabId": PTabID
 	} then
 	(
+		LogNotice("Starting AI-generation of smart contract human-readable text.",
+		{
+			"Actor":QuickLoginUser.Jid,
+			"Type":PType,
+			"Scope":PScope,
+			"Roles":PRoles,
+			"Jurisdiction":PJurisdiction,
+			"References":PReferences
+		});
+
 		NeuroFoundryState.ContractMarkdown:="⌛";
 		NeuroFoundryState.HeaderInfo:=null;
 		NeuroFoundryState.EditMode:=true;
@@ -160,17 +170,25 @@ if exists(Posted) then
 		NeuroFoundryState.Title:=null;
 		NeuroFoundryState.Headers:=[];
 		NeuroFoundryState.MoreHeaders:=true;
+		NeuroFoundryState.QueriesLeft:=1000;
+		NeuroFoundryState.NrHeaders:=0;
+		NeuroFoundryState.NrBodies:=0;
 
 		Background((
 			AddMarkdown:=(Markdown,Placeholder)->
 			(
+				Markdown:=Markdown.Trim().Replace(":**","\\:**");
 				s:=NeuroFoundryState.ContractMarkdown;
 				i:=s.IndexOf(Placeholder);
 
 				if (i < 0) then
 					s += "\r\n\r\n" + Markdown
 				else
-					s := s.Substring(0, i) + Markdown + "\r\n\r\n" + s.Substring(i + len(Placeholder));
+				(
+					s2:=s.Substring(i + len(Placeholder));
+					if !empty(s2) then s2:="\r\n\r\n" + s2;
+					s := s.Substring(0, i) + Markdown + s2;
+				);
 
 				NeuroFoundryState.ContractMarkdown:=s;
 			);
@@ -179,6 +197,8 @@ if exists(Posted) then
 			(
 				NeuroFoundryState.Title:=Data.Title;
 				NeuroFoundryState.GenSectionNr:=1;
+				NeuroFoundryState.NrHeaders:=0;
+				NeuroFoundryState.NrBodies:=0;
 				Markdown:=Data.Title + "\r\n" + 
 					Create(System.String,'=',Data.Title.Length + 3) + "\r\n\r\n⌛";
 				AddMarkdown(Markdown,"⌛");
@@ -194,6 +214,7 @@ if exists(Posted) then
 
 			RecommendHeader:=Data->
 			(
+				NeuroFoundryState.NrHeaders++;
 				NeuroFoundryState.Headers:=join(NeuroFoundryState.Headers,Data.Header);
 				HeaderNr:=NeuroFoundryState.GenSectionNr++;
 				Markdown:=Data.Header + "\r\n" + 
@@ -226,10 +247,14 @@ if exists(Posted) then
 
 			RecommendSectionBody:=Data->
 			(
+				NeuroFoundryState.NrBodies++;
 				AddMarkdown(Data.Markdown,"⚙" + Str(Data.headerNr));
 
-				if Data.headerNr==count(NeuroFoundryState.Headers) and !NeuroFoundryState.MoreHeaders then
+				if NeuroFoundryState.NrBodies=NeuroFoundryState.NrHeaders and !NeuroFoundryState.MoreHeaders then
+				(
+					NeuroFoundryState.Generating:=false;
 					PushEvent(PTabID,"DocumentComplete","");
+				)
 			);
 
 			NoMoreHeaders:=Data->
@@ -240,47 +265,50 @@ if exists(Posted) then
 
 			AskAi(Instruction,Parameters,Functions):=
 			(
-				Request:=
-				{
-					"type":NeuroFoundryState.Type,
-					"scope":NeuroFoundryState.Scope,
-					"roles":NeuroFoundryState.Roles,
-					"jurisdiction":NeuroFoundryState.Jurisdiction,
-					"references":NeuroFoundryState.References,
-					"title":NeuroFoundryState.Title,
-					"headers":NeuroFoundryState.Headers
-				};
-
-				foreach P in Parameters do Request[P.Key]:=P.Value;
-
-				R:=ChatGpt(
-					"You help legal professionals generate texts for legal documents. "+
-					"During the generation of the document, multiple calls will be made. "+
-					"You take JSON as input that will contain what is known. You call functions "+
-					"to return recommendations. Input properties are as follows: 'type' defines "+
-					"the type of document that is to be generated, 'scope' contains a description "+
-					"of the scope of the document, 'roles' describes the roles included in the "+
-					"contract, 'jurisdiction' defines the legal jurisdiction, "+
-					"'references' contains any references that should be taken into account, "+
-					"'title', if defined, contains the title of the document, and 'headers' "+
-					"contain the headers that already have been generated. " + Instruction,
-					QuickLoginUser.Jid, JSON.Encode(Request, false), Functions, false, false);
-
-				if empty(R.Content) then
+				if (--NeuroFoundryState.QueriesLeft>=0) then
 				(
-					foreach P in Parameters do R.Function.Arguments[P.Key]:=P.Value;
-					
-					PushEvent(PTabID,R.Function.Name,R.Function.Arguments);
-					eval(R.Function.Name)(R.Function.Arguments)
-				)
-				else
-				(
-					PushEvent(PTabID,"AddMarkdown",
+					Request:=
 					{
-						"Markdown":R.Content,
-						"Placeholder":"⌛"
-					});
-					AddMarkdown(R.Content,"⌛")
+						"type":NeuroFoundryState.Type,
+						"scope":NeuroFoundryState.Scope,
+						"roles":NeuroFoundryState.Roles,
+						"jurisdiction":NeuroFoundryState.Jurisdiction,
+						"references":NeuroFoundryState.References,
+						"title":NeuroFoundryState.Title,
+						"headers":NeuroFoundryState.Headers
+					};
+
+					foreach P in Parameters do Request[P.Key]:=P.Value;
+
+					R:=ChatGpt(
+						"You help legal professionals generate texts for legal documents. "+
+						"During the generation of the document, multiple calls will be made. "+
+						"You take JSON as input that will contain what is known. You call functions "+
+						"to return recommendations. Input properties are as follows: 'type' defines "+
+						"the type of document that is to be generated, 'scope' contains a description "+
+						"of the scope of the document, 'roles' describes the roles included in the "+
+						"contract, 'jurisdiction' defines the legal jurisdiction, "+
+						"'references' contains any references that should be taken into account, "+
+						"'title', if defined, contains the title of the document, and 'headers' "+
+						"contain the headers that already have been generated. " + Instruction,
+						QuickLoginUser.Jid, JSON.Encode(Request, false), Functions, false, false);
+
+					if empty(R.Content) then
+					(
+						foreach P in Parameters do R.Function.Arguments[P.Key]:=P.Value;
+					
+						PushEvent(PTabID,R.Function.Name,R.Function.Arguments);
+						eval(R.Function.Name)(R.Function.Arguments)
+					)
+					else
+					(
+						PushEvent(PTabID,"AddMarkdown",
+						{
+							"Markdown":R.Content,
+							"Placeholder":"⌛"
+						});
+						AddMarkdown(R.Content,"⌛")
+					)
 				)
 			);
 
