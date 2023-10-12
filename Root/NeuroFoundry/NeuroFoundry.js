@@ -143,4 +143,74 @@ function CreateManually()
 
 function StartAICreationProcess()
 {
+    DoFullPagePost(
+        {
+            "cmd": "SuggestWithAi",
+            "type": document.getElementById("DocumentType").value,
+            "scope": document.getElementById("DocumentScope").value,
+            "roles": document.getElementById("DocumentRoles").value,
+            "jurisdiction": document.getElementById("DocumentJurisdiction").value,
+            "references": document.getElementById("DocumentReferences").value,
+            "tabId": TabID
+        });
+}
+
+function AddMarkdown(Data)
+{
+    var Control = document.getElementById("ContractMarkdown");
+    var s = Control.value;
+    var i = s.indexOf(Data.Placeholder);
+
+    if (i < 0)
+        s += "\r\n\r\n" + Data.Markdown;
+    else
+        s = s.substring(0, i) + Data.Markdown + "\r\n\r\n" + s.substring(i + Data.Placeholder.length);
+
+    Control.value = s;
+}
+
+var HeaderNr = 0;
+
+function RecommendGenericTitle(Data)
+{
+    HeaderNr = 0;
+    var Markdown = Data.Title + "\r\n" + '='.repeat(Data.Title.length + 3) + "\r\n\r\n⌛";
+    AddMarkdown({
+        "Markdown": Markdown,
+        "Placeholder": "⌛"
+    });
+}
+
+function RecommendHeader(Data)
+{
+    var Markdown = Data.Header + "\r\n" + '-'.repeat(Data.Header.length + 3) + "\r\n\r\n⚙" +
+        (++HeaderNr).toString() + "\r\n\r\n⌛";
+    AddMarkdown({
+        "Markdown": Markdown,
+        "Placeholder": "⌛"
+    });
+}
+
+function RecommendSectionBody(Data)
+{
+    AddMarkdown({
+        "Markdown": Data.Markdown,
+        "Placeholder": "⚙" + Data.headerNr.toString()
+    });
+}
+
+function NoMoreHeaders(Data)
+{
+    AddMarkdown({
+        "Markdown": "",
+        "Placeholder": "⌛"
+    });
+}
+
+function DocumentComplete(Data)
+{
+    document.getElementById("ContractMarkdown").removeAttribute("readonly");
+
+    var Span = document.getElementById("PleaseWaitWhileGenerating");
+    Span.innerHTML = "Edit the text of the document, using <a href=\"ContractMarkdown.md\" target=\"_blank\">Markdown</a>";
 }
