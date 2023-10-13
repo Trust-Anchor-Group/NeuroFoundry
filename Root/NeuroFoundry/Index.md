@@ -123,6 +123,17 @@ if exists(Posted) then
 	(
 		NeuroFoundryState.ContractMarkdown:="";
 		NeuroFoundryState.HeaderInfo:=null;
+		if exists(NeuroFoundryState.Tasks) then 
+		(
+			Abort(NeuroFoundryState.Tasks);
+			NeuroFoundryState.Tasks:=null;
+
+			LogNotice("AI-generation of smart contract aborted.",
+			{
+				"Actor":QuickLoginUser.Jid,
+				"EventId":"AiAborted"
+			});
+		)
 	)
 	else if Posted matches {
 		"cmd":"CreateManually",
@@ -154,7 +165,8 @@ if exists(Posted) then
 			"Scope":PScope,
 			"Roles":PRoles,
 			"Jurisdiction":PJurisdiction,
-			"References":PReferences
+			"References":PReferences,
+			"EventId":"AiStarted"
 		});
 
 		NeuroFoundryState.ContractMarkdown:="⌛";
@@ -173,8 +185,20 @@ if exists(Posted) then
 		NeuroFoundryState.QueriesLeft:=1000;
 		NeuroFoundryState.NrHeaders:=0;
 		NeuroFoundryState.NrBodies:=0;
+		NeuroFoundryState.StartTime:=Now;
 
-		Background((
+		if exists(NeuroFoundryState.Tasks) then 
+		(
+			Abort(NeuroFoundryState.Tasks);
+
+			LogNotice("AI-generation of smart contract aborted.",
+			{
+				"Actor":QuickLoginUser.Jid,
+				"EventId":"AiAborted"
+			})
+		);
+
+		NeuroFoundryState.Tasks:=[Background((
 			AddMarkdown:=(Markdown,Placeholder)->
 			(
 				Markdown:=Markdown.Trim().Replace(":**","\\:**");
@@ -203,13 +227,14 @@ if exists(Posted) then
 					Create(System.String,'=',Data.Title.Length + 3) + "\r\n\r\n⌛";
 				AddMarkdown(Markdown,"⌛");
 
-				Background(AskAi("Recommend the header of the first section of the document.",{},
-					[
-						ChatGptFunction("RecommendHeader", "Recommends a short generic and reusable header for a section of the document.",
-							[
-								ChatGptString("Header", "Short generic and reusable header of a section of the document.", true)
-							])
-					]));
+				NeuroFoundryState.Tasks:=join(NeuroFoundryState.Tasks,
+					Background(AskAi("Recommend the header of the first section of the document.",{},
+						[
+							ChatGptFunction("RecommendHeader", "Recommends a short generic and reusable header for a section of the document.",
+								[
+									ChatGptString("Header", "Short generic and reusable header of a section of the document.", true)
+								])
+						])));
 			);
 
 			RecommendHeader:=Data->
@@ -222,27 +247,28 @@ if exists(Posted) then
 					Str(HeaderNr) + "\r\n\r\n⌛";
 				AddMarkdown(Markdown,"⌛");
 
-				Background(AskAi("Recommend the header of the next section of the document, or determine that no more sections are necessary for a complete document according to requirements.",{},
-					[
-						ChatGptFunction("RecommendHeader", "Recommends a short generic and reusable header for a section of the document.",
-							[
-								ChatGptString("Header", "Short generic and reusable header of a section of the document.", true)
-							]),
-						ChatGptFunction("NoMoreHeaders", "Determines that no more sections are necessary for a complete document.",
-							[])
-					]));
+				NeuroFoundryState.Tasks:=join(NeuroFoundryState.Tasks,
+					Background(AskAi("Recommend the header of the next section of the document, or determine that no more sections are necessary for a complete document according to requirements.",{},
+						[
+							ChatGptFunction("RecommendHeader", "Recommends a short generic and reusable header for a section of the document.",
+								[
+									ChatGptString("Header", "Short generic and reusable header of a section of the document.", true)
+								]),
+							ChatGptFunction("NoMoreHeaders", "Determines that no more sections are necessary for a complete document.",
+								[])
+						])),
 
-				Background(AskAi("Recommend the body text of a given section of the document. The section is given by the 'sectionHeader' property. The body text should be formatted using Markdown, and returned via the function call. The body text does not need to repeat the header.",
-					{
-						"sectionHeader":Data.Header,
-						"headerNr":HeaderNr
-					},
-					[
-						ChatGptFunction("RecommendSectionBody", "Recommends the body text of a given section of the document.",
-							[
-								ChatGptString("Markdown", "Markdown of the body text of the specified section in the document being generated.", true)
-							])
-					]));
+					Background(AskAi("Recommend the body text of a given section of the document. The section is given by the 'sectionHeader' property. The body text should be formatted using Markdown, and returned via the function call. The body text does not need to repeat the header.",
+						{
+							"sectionHeader":Data.Header,
+							"headerNr":HeaderNr
+						},
+						[
+							ChatGptFunction("RecommendSectionBody", "Recommends the body text of a given section of the document.",
+								[
+									ChatGptString("Markdown", "Markdown of the body text of the specified section in the document being generated.", true)
+								])
+						])))
 			);
 
 			RecommendSectionBody:=Data->
@@ -253,7 +279,21 @@ if exists(Posted) then
 				if NeuroFoundryState.NrBodies=NeuroFoundryState.NrHeaders and !NeuroFoundryState.MoreHeaders then
 				(
 					NeuroFoundryState.Generating:=false;
+					NeuroFoundryState.Tasks:=null;
+
 					PushEvent(PTabID,"DocumentComplete","");
+
+					LogNotice("AI-generation of smart contract human-readable text completed.",
+					{
+						"Actor":QuickLoginUser.Jid,
+						"Type":NeuroFoundryState.Type,
+						"Scope":NeuroFoundryState.Scope,
+						"Roles":NeuroFoundryState.Roles,
+						"Jurisdiction":NeuroFoundryState.Jurisdiction,
+						"References":NeuroFoundryState.References,
+						"ElapsedTime":Now.Subtract(NeuroFoundryState.StartTime).ToString(),
+						"EventId":"AiCompleted"
+					});
 				)
 			);
 
@@ -319,7 +359,7 @@ if exists(Posted) then
 							ChatGptString("Title", "Short generic and reusable title to display at the top of the document.", true)
 						])
 				]);
-		));
+		))];
 	)
 	else if Posted matches {
 		"cmd":"EditDocument"
@@ -333,6 +373,17 @@ if exists(Posted) then
 	} then
 	(
 		NeuroFoundryState.EditMode:=false;
+		if exists(NeuroFoundryState.Tasks) then 
+		(
+			Abort(NeuroFoundryState.Tasks);
+			NeuroFoundryState.Tasks:=null;
+
+			LogNotice("AI-generation of smart contract aborted.",
+			{
+				"Actor":QuickLoginUser.Jid,
+				"EventId":"AiAborted"
+			});
+		)
 	)
 	else if Posted matches {
 		"cmd":"DocumentEdited",
@@ -341,6 +392,18 @@ if exists(Posted) then
 	(
 		NeuroFoundryState.EditMode:=false;
 		NeuroFoundryState.ContractMarkdown:=PMarkdown;
+
+		if exists(NeuroFoundryState.Tasks) then 
+		(
+			Abort(NeuroFoundryState.Tasks);
+			NeuroFoundryState.Tasks:=null;
+
+			LogNotice("AI-generation of smart contract aborted.",
+			{
+				"Actor":QuickLoginUser.Jid,
+				"EventId":"AiAborted"
+			});
+		)
 	)
 	else if Posted matches {
 		"cmd":"SelectLanguage",
