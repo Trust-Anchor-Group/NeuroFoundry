@@ -40,7 +40,11 @@ if !exists(NeuroFoundryState) then NeuroFoundryState:=
 	"Jurisdiction":"",
 	"References":"",
 	"Generating":false,
-	"CanUpdate":true
+	"CanUpdate":true,
+	NrErrors:0,
+	NrQuestions:0,
+	NrResponses:0,
+	ErrorSent:false
 };
 
 if exists(Posted) then
@@ -190,6 +194,10 @@ if exists(Posted) then
 		NeuroFoundryState.NrBodies:=0;
 		NeuroFoundryState.StartTime:=Now;
 		NeuroFoundryState.CanUpdate:=false;
+		NeuroFoundryState.NrErrors:=0;
+		NeuroFoundryState.NrQuestions:=0;
+		NeuroFoundryState.NrResponses:=0;
+		NeuroFoundryState.ErrorSent:=false;
 
 		if exists(NeuroFoundryState.Tasks) then 
 		(
@@ -308,53 +316,84 @@ if exists(Posted) then
 				AddMarkdown("","⌛");
 			);
 
+			StartRequest:=()->
+			(
+				NeuroFoundryState.NrQuestions++;
+			);
+
+			EndRequest:=(Error)->
+			(
+				if Error then
+					NeuroFoundryState.NrErrors++
+				else
+					NeuroFoundryState.NrResponses++;
+
+				if NeuroFoundryState.NrErrors>0 and 
+					NeuroFoundryState.NrErrors+NeuroFoundryState.NrResponses=NeuroFoundryState.NrQuestions and
+					!NeuroFoundryState.ErrorSent then
+				(
+					NeuroFoundryState.ErrorSent:=true;
+					PushEvent(PTabID,"ProcessingError",{});
+				)
+			);
+
 			AskAi(Instruction,Parameters,Functions):=
 			(
 				if (--NeuroFoundryState.QueriesLeft>=0) then
 				(
-					Request:=
-					{
-						"type":NeuroFoundryState.Type,
-						"scope":NeuroFoundryState.Scope,
-						"roles":NeuroFoundryState.Roles,
-						"jurisdiction":NeuroFoundryState.Jurisdiction,
-						"references":NeuroFoundryState.References,
-						"title":NeuroFoundryState.Title,
-						"headers":NeuroFoundryState.Headers
-					};
-
-					foreach P in Parameters do Request[P.Key]:=P.Value;
-
-					Instruction :=
-						"You help legal professionals generate texts for legal documents. "+
-						"During the generation of the document, multiple calls will be made. "+
-						"You take JSON as input that will contain what is known. You call functions "+
-						"to return recommendations. Input properties are as follows: 'type' defines "+
-						"the type of document that is to be generated, 'scope' contains a description "+
-						"of the scope of the document, 'roles' describes the roles included in the "+
-						"contract, 'jurisdiction' defines the legal jurisdiction, "+
-						"'references' contains any references that should be taken into account, "+
-						"'title', if defined, contains the title of the document, and 'headers' "+
-						"contain the headers that already have been generated. " + Instruction;
-
-					R:=(ChatGpt(Instruction, QuickLoginUser.Jid, JSON.Encode(Request, false), Functions, false, false)
-						??? ChatGpt(Instruction, QuickLoginUser.Jid, JSON.Encode(Request, false), Functions, false, false));
-
-					if empty(R.Content) then
+					StartRequest();
+					try
 					(
-						foreach P in Parameters do R.Function.Arguments[P.Key]:=P.Value;
-					
-						PushEvent(PTabID,R.Function.Name,R.Function.Arguments);
-						eval(R.Function.Name)(R.Function.Arguments)
-					)
-					else
-					(
-						PushEvent(PTabID,"AddMarkdown",
+						Request:=
 						{
-							"Markdown":R.Content,
-							"Placeholder":"⌛"
-						});
-						AddMarkdown(R.Content,"⌛")
+							"type":NeuroFoundryState.Type,
+							"scope":NeuroFoundryState.Scope,
+							"roles":NeuroFoundryState.Roles,
+							"jurisdiction":NeuroFoundryState.Jurisdiction,
+							"references":NeuroFoundryState.References,
+							"title":NeuroFoundryState.Title,
+							"headers":NeuroFoundryState.Headers
+						};
+
+						foreach P in Parameters do Request[P.Key]:=P.Value;
+
+						Instruction :=
+							"You help legal professionals generate texts for legal documents. "+
+							"During the generation of the document, multiple calls will be made. "+
+							"You take JSON as input that will contain what is known. You call functions "+
+							"to return recommendations. Input properties are as follows: 'type' defines "+
+							"the type of document that is to be generated, 'scope' contains a description "+
+							"of the scope of the document, 'roles' describes the roles included in the "+
+							"contract, 'jurisdiction' defines the legal jurisdiction, "+
+							"'references' contains any references that should be taken into account, "+
+							"'title', if defined, contains the title of the document, and 'headers' "+
+							"contain the headers that already have been generated. " + Instruction;
+
+						R:=(ChatGpt(Instruction, QuickLoginUser.Jid, JSON.Encode(Request, false), Functions, false, false)
+							??? ChatGpt(Instruction, QuickLoginUser.Jid, JSON.Encode(Request, false), Functions, false, false));
+
+						if empty(R.Content) then
+						(
+							foreach P in Parameters do R.Function.Arguments[P.Key]:=P.Value;
+					
+							PushEvent(PTabID,R.Function.Name,R.Function.Arguments);
+							eval(R.Function.Name)(R.Function.Arguments)
+						)
+						else
+						(
+							PushEvent(PTabID,"AddMarkdown",
+							{
+								"Markdown":R.Content,
+								"Placeholder":"⌛"
+							});
+							AddMarkdown(R.Content,"⌛")
+						);
+
+						EndRequest(false)
+					)
+					catch
+					(
+						EndRequest(true)
 					)
 				)
 			);

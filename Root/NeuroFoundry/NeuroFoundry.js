@@ -229,3 +229,9 @@ function DocumentComplete(Data)
     Control = document.getElementById("PleaseWaitWhileGenerating");
     Control.innerHTML = "Edit the text of the document, using <a href=\"ContractMarkdown.md\" target=\"_blank\">Markdown</a>";
 }
+
+function ProcessingError(Data)
+{
+    DocumentComplete(Data);
+    window.alert("The document-generation process failed. You can choose to throw away what has been generated and try again.");
+}
