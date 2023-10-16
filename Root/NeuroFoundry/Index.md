@@ -325,7 +325,7 @@ if exists(Posted) then
 
 					foreach P in Parameters do Request[P.Key]:=P.Value;
 
-					R:=ChatGpt(
+					Instruction :=
 						"You help legal professionals generate texts for legal documents. "+
 						"During the generation of the document, multiple calls will be made. "+
 						"You take JSON as input that will contain what is known. You call functions "+
@@ -335,8 +335,10 @@ if exists(Posted) then
 						"contract, 'jurisdiction' defines the legal jurisdiction, "+
 						"'references' contains any references that should be taken into account, "+
 						"'title', if defined, contains the title of the document, and 'headers' "+
-						"contain the headers that already have been generated. " + Instruction,
-						QuickLoginUser.Jid, JSON.Encode(Request, false), Functions, false, false);
+						"contain the headers that already have been generated. " + Instruction;
+
+					R:=(ChatGpt(Instruction, QuickLoginUser.Jid, JSON.Encode(Request, false), Functions, false, false)
+						??? ChatGpt(Instruction, QuickLoginUser.Jid, JSON.Encode(Request, false), Functions, false, false));
 
 					if empty(R.Content) then
 					(
