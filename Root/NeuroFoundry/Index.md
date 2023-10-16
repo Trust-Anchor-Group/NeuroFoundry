@@ -39,7 +39,8 @@ if !exists(NeuroFoundryState) then NeuroFoundryState:=
 	"Roles":"",
 	"Jurisdiction":"",
 	"References":"",
-	"Generating":false
+	"Generating":false,
+	"CanUpdate":true
 };
 
 if exists(Posted) then
@@ -55,6 +56,7 @@ if exists(Posted) then
 		NeuroFoundryState.Contract.Created:=NowUtc;
 		NeuroFoundryState.Contract.PartsMode:=Waher.Service.IoTBroker.Legal.Contracts.ContractParts.Open;
 		NeuroFoundryState.StartMode:='UploadWord';
+		NeuroFoundryState.CanUpdate:=true;
 
 		HeaderInfo:=null;
 		if MS.ContractUtilities.ExtractParameters(Markdown,HeaderInfo) then
@@ -147,6 +149,7 @@ if exists(Posted) then
 		NeuroFoundryState.Title:=PTitle;
 		NeuroFoundryState.StartMode:='Manually';
 		NeuroFoundryState.Generating:=false;
+		NeuroFoundryState.CanUpdate:=true;
 	)
 	else if Posted matches {
 		"cmd":"SuggestWithAi",
@@ -186,6 +189,7 @@ if exists(Posted) then
 		NeuroFoundryState.NrHeaders:=0;
 		NeuroFoundryState.NrBodies:=0;
 		NeuroFoundryState.StartTime:=Now;
+		NeuroFoundryState.CanUpdate:=false;
 
 		if exists(NeuroFoundryState.Tasks) then 
 		(
@@ -279,6 +283,7 @@ if exists(Posted) then
 				if NeuroFoundryState.NrBodies=NeuroFoundryState.NrHeaders and !NeuroFoundryState.MoreHeaders then
 				(
 					NeuroFoundryState.Generating:=false;
+					NeuroFoundryState.CanUpdate:=true;
 					NeuroFoundryState.Tasks:=null;
 
 					PushEvent(PTabID,"DocumentComplete","");
@@ -373,6 +378,8 @@ if exists(Posted) then
 	} then
 	(
 		NeuroFoundryState.EditMode:=false;
+		NeuroFoundryState.CanUpdate:=true;
+
 		if exists(NeuroFoundryState.Tasks) then 
 		(
 			Abort(NeuroFoundryState.Tasks);
@@ -580,7 +587,7 @@ Edit the text of the document, using <a href="ContractMarkdown.md" target="_blan
 <textarea id="ContractMarkdown" name="ContractMarkdown" autofocus></textarea>
 [[;
 			]]
-<button type="button" class="posButton" onclick="UpdateText()">Update</button>
+<button id='UpdateButton' type="button" ((NeuroFoundryState.CanUpdate ? "class='posButton'" : "class='disabledButton' disabled")) onclick="UpdateText()">Update</button>
 <button type="button" class="negButton" onclick="CancelEdit()">Cancel</button>
 
 <script>LoadContractMarkdown()</script>

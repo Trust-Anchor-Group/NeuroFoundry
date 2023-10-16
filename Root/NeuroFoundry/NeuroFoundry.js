@@ -217,8 +217,15 @@ function NoMoreHeaders(Data)
 
 function DocumentComplete(Data)
 {
-    document.getElementById("ContractMarkdown").removeAttribute("readonly");
+    var Control;
 
-    var Span = document.getElementById("PleaseWaitWhileGenerating");
-    Span.innerHTML = "Edit the text of the document, using <a href=\"ContractMarkdown.md\" target=\"_blank\">Markdown</a>";
+    Control = document.getElementById("ContractMarkdown");
+    Control.removeAttribute("readonly");
+
+    Control = document.getElementById("UpdateButton");
+    Control.removeAttribute("disabled");
+    Control.setAttribute("class", "posButton");
+
+    Control = document.getElementById("PleaseWaitWhileGenerating");
+    Control.innerHTML = "Edit the text of the document, using <a href=\"ContractMarkdown.md\" target=\"_blank\">Markdown</a>";
 }
