@@ -48,7 +48,7 @@ Example:
 </FileFolders>
 ```
 
-**Note**: Once file folder reference is added, you need to restart the *IoT Gateway service* for the change to take effect.
+**Note**: Once the file folder reference is added, you need to restart the *IoT Gateway service* for the change to take effect.
 
 You will also need to copy the `NeuroFoundry.config` file to the Program Data folder of the gateway, to initialize the database, 
 indexes and full-text-search functions, and then restart the gateway. This configuration file contains initialization script
