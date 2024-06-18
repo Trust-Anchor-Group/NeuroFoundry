@@ -28,7 +28,9 @@ if !exists(QuickLoginUser) then
 	(
 		QuickLoginUser:=
 		{
-			"Jid": Waher.IoTGateway.Gateway.XmppClient.BareJID
+			"UserName": Before(Waher.IoTGateway.Gateway.XmppClient.BareJID,"@"),
+			"Jid": Waher.IoTGateway.Gateway.XmppClient.BareJID,
+			"HasPrivilege": (P)->false
 		}
 	)
 	else
@@ -122,7 +124,7 @@ if exists(Posted) then
 		NeuroFoundryState.HeaderInfo:=HeaderInfo;
 
 		Parsed:=Waher.Content.Markdown.MarkdownDocument.CreateAsync(NeuroFoundryState.ContractMarkdown,[]);
-		SmartContractXml:=Parsed.GenerateSmartContractXml();
+		SmartContractXml:=Waher.Content.Markdown.Contracts.ContractsExtensions.GenerateSmartContractXml(Parsed);
 	
 		SmartContractXml:=Xml("<Root xmlns='urn:ieee:iot:leg:sc:1.0'>"+SmartContractXml+"</Root>");
 		SmartContractText:=Waher.Service.IoTBroker.Legal.HumanReadable.HumanReadableText.Parse(SmartContractXml.DocumentElement);
