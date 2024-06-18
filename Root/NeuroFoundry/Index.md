@@ -22,7 +22,18 @@ or its variants.
 {{
 MS:=TAG.Content.Microsoft;
 
-if !exists(QuickLoginUser) then QuickLoginUser:=null;
+if !exists(QuickLoginUser) then 
+(
+	if empty(Waher.IoTGateway.Gateway.Domain) then
+	(
+		QuickLoginUser:=
+		{
+			"Jid": Waher.IoTGateway.Gateway.XmppClient.BareJID
+		}
+	)
+	else
+		QuickLoginUser:=null;
+);
 
 if !exists(NeuroFoundryState) then NeuroFoundryState:=
 {
@@ -533,7 +544,7 @@ human users can read. You can either:
 
 [[;
 
-			if ChatGptConfigured() then ]]
+			if (ChatGptConfigured() ??? false) then ]]
 <p>
 <input type="radio" id="SuggestWithAi" name="StartMethod" value="AI" ((NeuroFoundryState.StartMode='SuggestWithAi' ? 'checked' : '' ??? '')) onclick="StartMethodChanged()">
 <label for="SuggestWithAi">Start from a suggestion created by **Artificial Intelligence**,</label>
@@ -558,7 +569,7 @@ human users can read. You can either:
 </fieldset>
 [[;
 
-			if ChatGptConfigured() then ]]
+			if (ChatGptConfigured() ??? false) then ]]
 
 <fieldset id="SuggestWithAiForm" style="display:((NeuroFoundryState.StartMode='SuggestWithAi' ? 'block' : 'none' ??? 'none'))">
 <legend><span class="headerText">Let *Artifical Intelligence* suggest a text</span></legend>
