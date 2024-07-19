@@ -26,12 +26,9 @@ if !exists(QuickLoginUser) then
 (
 	if empty(Waher.IoTGateway.Gateway.Domain) then
 	(
-		QuickLoginUser:=
-		{
-			"UserName": Before(Waher.IoTGateway.Gateway.XmppClient.BareJID,"@"),
-			"Jid": Waher.IoTGateway.Gateway.XmppClient.BareJID,
-			"HasPrivilege": (P)->false
-		}
+		QuickLoginUser:=EphemeralUser(
+			Before(Waher.IoTGateway.Gateway.XmppClient.BareJID,"@"),
+			Waher.IoTGateway.Gateway.XmppClient.BareJID)
 	)
 	else
 		QuickLoginUser:=null;
