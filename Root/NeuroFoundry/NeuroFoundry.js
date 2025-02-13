@@ -233,5 +233,5 @@ function DocumentComplete(Data)
 function ProcessingError(Data)
 {
     DocumentComplete(Data);
-    window.alert("The document-generation process failed. You can choose to throw away what has been generated and try again.");
+    Popup.Alert("The document-generation process failed. You can choose to throw away what has been generated and try again.");
 }
